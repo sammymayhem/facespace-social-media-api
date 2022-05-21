@@ -6,16 +6,8 @@ module.exports = {
     // Get all users
     getUsers(req, res) {
         User.find()
-            .then(async (users) => {
-                const userObj = {
-                    users,
-                };
-                return res.json(studentObj);
-            })
-            .catch((err) => {
-                console.log(err);
-                return res.status(500).json(err);
-            });
+            .then((users) => res.json(users))
+            .catch((err) => res.status(500).json(err));
     },
 
     // Ger a single user by ID
@@ -79,18 +71,15 @@ module.exports = {
         User.findOneAndUpdate(
             { _id: req.params.userId },
             { $addToSet: { friends: req.body } },
-            { runValidators: true, new: true }
+            { runValidators: true, new: true },
         )
             .then((user) =>
                 !user
-                    ? res
-                        .status(404)
-                        .json({ message: "No user found with that ID :(" })
+                    ? res.status(404).json({ message: "No user found with that ID :(" })
                     : res.json(user)
             )
             .catch((err) => res.status(500).json(err));
     },
-
     // Delete a friend
     removeFriend(req, res) {
         user.findOneAndUpdate(
@@ -107,5 +96,13 @@ module.exports = {
             )
             .catch((err) => res.status(500).json(err));
     },
-
 };
+
+
+
+
+
+
+
+
+
