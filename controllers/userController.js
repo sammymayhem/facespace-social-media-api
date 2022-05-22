@@ -14,8 +14,14 @@ module.exports = {
     getSingleUser(req, res) {
         User.findOne({ _id: req.params.userId })
             .select("-__v")
-            .populate({ path: 'Thought' })
-            .populate({ path: 'reactionSchema' })
+            .populate({
+                path: 'Thought',
+                strictPopulate: false
+            })
+            .populate({
+                path: 'reactionSchema',
+                strictPopulate: false
+            })
             .then(async (user) =>
                 !user
                     ? res.status(404).json({ message: "No user with that ID" })
@@ -55,11 +61,6 @@ module.exports = {
     // Detelet a user
     deleteUser(req, res) {
         User.findOneAndDelete({ _id: req.params.userId })
-            .then((user) =>
-                !user
-                    ? res.status(404).json({ message: 'No user with that ID' })
-                    : Thought.deleteMany({ _id: { $in: user.thoughts } })
-            )
             .then(() => res.json({ message: 'User and their thoughts have been deleted!' }))
             .catch((err) => res.status(500).json(err));
     },
@@ -67,10 +68,9 @@ module.exports = {
     // Add a friend
     addFriend(req, res) {
         console.log("You made a friend!");
-        console.log(req.body);
         User.findOneAndUpdate(
             { _id: req.params.userId },
-            { $addToSet: { friends: req.body } },
+            { $push: { friends: req.params.friendId } },
             { runValidators: true, new: true },
         )
             .then((user) =>
@@ -82,9 +82,9 @@ module.exports = {
     },
     // Delete a friend
     removeFriend(req, res) {
-        user.findOneAndUpdate(
-            { _id: req.params.usertId },
-            { $pull: { friends: { friendId: req.params.friendId } } },
+        User.findOneAndUpdate(
+            { _id: req.params.userId },
+            { $pull: { friends: req.params.friendId } },
             { runValidators: true, new: true }
         )
             .then((user) =>
